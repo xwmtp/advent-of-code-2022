@@ -1,10 +1,50 @@
 import requests
 import sys
 import os
+import datetime
 
-DAY = 1
 
-FORMATTED_DAY = f"0{DAY}" if DAY < 10 else str(DAY)
+class Downloader:
+
+    def __init__(self):
+        self.day = get_current_day()
+        self.formatted_day = formatted_day(self.day)
+        print(self.formatted_day)
+
+    def fetch_input(self):
+        url = f"https://adventofcode.com/2021/day/{self.day}/input"
+        response = requests.post(url, cookies={'session': get_session_cookie()})
+        if response.status_code != 200:
+            raise Exception(f"Error code {response.status_code} while fetching {url}: {response.text}")
+        print(repr(response.text))
+        return response.text
+
+    def save_input(self, input_string):
+        folder_path = f'../day{formatted_day(self.day)}'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        with open(f'../day{formatted_day(self.day)}/input.txt', 'w') as file:
+            file.write(input_string)
+
+    def save_template(self, template_string):
+        folder_path = f'../day{formatted_day(self.day)}'
+        if not os.path.exists(folder_path):
+            os.makedirs(folder_path)
+
+        with open(f'../day{formatted_day(self.day)}/day{formatted_day(self.day)}.py', 'w') as file:
+            file.write(template_string)
+
+    def get_solution_template(self):
+        return f"""# https://adventofcode.com/2022/day/{self.day}
+    
+    with open('input.txt', 'r') as file:
+        input = file.read()
+        lines = file.read().splitlines()
+        
+    # --- Part 1 --- #
+    print(input)
+    """
 
 
 def get_session_cookie():
@@ -14,47 +54,24 @@ def get_session_cookie():
     return session_cookie
 
 
-def fetch_input():
-    url = f"https://adventofcode.com/2021/day/{DAY}/input"
-    response = requests.post(url, cookies={'session': get_session_cookie()})
-    if response.status_code != 200:
-        raise Exception(f"Error code {response.status_code} while fetching {url}: {response.text}")
-    return response.text
+def get_current_day():
+    month = datetime.datetime.now().month
+    if month == 12:
+        return datetime.datetime.now().day
+    if sys.argv[2] is None:
+        raise Exception('Missing day, and its not December. please day as 2nd command line argument')
+    return int(sys.argv[3])
 
 
-def save_input(input_string):
-    folder_path = f'../day{FORMATTED_DAY}'
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    with open(f'../day{FORMATTED_DAY}/input.txt', 'w') as file:
-        file.write(input_string)
-
-
-def save_template(template_string):
-    folder_path = f'../day{FORMATTED_DAY}'
-    if not os.path.exists(folder_path):
-        os.makedirs(folder_path)
-
-    with open(f'../day{FORMATTED_DAY}/day{FORMATTED_DAY}.py', 'w') as file:
-        file.write(template_string)
-
-
-def get_solution_template():
-    return f"""# https://adventofcode.com/2022/day/{DAY}
-
-with open('input.txt', 'r') as file:
-    input = file.read()
-    lines = file.read().splitlines()
-    
-# --- Part 1 --- #
-print(input)
-"""
+def formatted_day(day):
+    return f"0{day}" if day < 10 else str(day)
 
 
 if __name__ == '__main__':
-    input_string = fetch_input()
-    template = get_solution_template()
+    downloader = Downloader()
 
-    save_input(input_string)
-    save_template(template)
+    input_string = downloader.fetch_input()
+    template = downloader.get_solution_template()
+
+    downloader.save_input(input_string)
+    downloader.save_template(template)
