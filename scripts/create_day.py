@@ -12,7 +12,8 @@ class Downloader:
         print(self.formatted_day)
 
     def fetch_input(self):
-        url = f"https://adventofcode.com/2021/day/{self.day}/input"
+        url = f"https://adventofcode.com/2022/day/{self.day}/input"
+        print(f"Fetching url {url}")
         response = requests.post(url, cookies={'session': get_session_cookie()})
         if response.status_code != 200:
             raise Exception(f"Error code {response.status_code} while fetching {url}: {response.text}")
@@ -38,13 +39,14 @@ class Downloader:
     def get_solution_template(self):
         return f"""# https://adventofcode.com/2022/day/{self.day}
     
-    with open('input.txt', 'r') as file:
-        input = file.read()
-        lines = file.read().splitlines()
-        
-    # --- Part 1 --- #
-    print(input)
-    """
+with open('input.txt', 'r') as file:
+    raw_input = file.read()
+    lines = raw_input.splitlines()
+    
+# --- Part 1 --- #
+
+print(input)
+"""
 
 
 def get_session_cookie():
