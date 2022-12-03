@@ -45,7 +45,7 @@ with open('input.txt', 'r') as file:
     
 # --- Part 1 --- #
 
-print(input)
+print(lines)
 """
 
 
